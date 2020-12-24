@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+	<title>echarts</title>
+	<link rel="stylesheet" type="text/css" href="./css/index.css">
+</head>
+<body>
+	<div class="echarts_box">
+		<!-- 饼状图 -->
+		   <div id="fd_age" class="shop_violations_box"></div>
+           <table class="shop_violations_table tableon"></table>
+         <!-- 树状图 -->
+           <div id="czh_year" class="shop_violations_box"></div>
+           <table class="shop_violations_table czh_years_table"></table>
+		<!-- 带有table统计 -->
+		     <div class="shop_violations_box">
+		        <div id="shop_violations_content"></div>
+		        <table class="shop_violations_table tabletwo"></table>
+   			 </div>
+   	     <!-- 不带table统计 -->
+   	      <div class="shop_violations_box">
+       		 <div id="shop_type_content"></div>
+   		  </div>
+	</div>
+</body>
+<script type="text/javascript" src="./js/jquery-1.11.3.min.js"></script>
+<script type="text/javascript" src="./js/echarts.min.js"></script>
+<script type="text/javascript" src="./js/shine.js"></script>
+<script type="text/javascript" src="./js/echartsFn.js"></script>
+<script type="text/javascript">
+    var myDate = new Date();
+    var new_year = myDate.getFullYear();  //获取当前时间
+
+    //比例样式根设计图调整
+
+    // 横向柱状图上下左右间距 - 结尾不加分号
+    var x_grid = {left: '3%', right: '3%', bottom: '2%', containLabel: true}
+    // 纵向柱状图上下左右间距
+    var y_grid = {left: '3%', right: '3%', bottom: '2%', containLabel: true}
+    // 纵向呼叫类型柱状图上下左右间距
+    var call_type_ygrid = {left: '0%', right: '5%', bottom: '3%', containLabel: true}
+
+
+    // 饼状图渲染数据
+    function pieTableFn(datas, dom, tableTr) {
+        var total = 0;
+        var table = $(dom).empty();
+        table.append(tableTr);
+        // 计算各模块数据的总和，计算占比使用
+        total = array_sum(datas, "value");
+        // console.log("total", total);
+        if (total != 0) {
+            $.each(datas, function () {
+                // 计算年龄占比,判断取值整数/小数
+                var percentage = (this.value / total) * 100;
+                // console.log("百分比", percentage);
+                // 判断当前模块计算结果：为整数时，取整；大于整数时，四舍五入取两位小数
+                if (percentage > parseInt(percentage)) {
+                    percentage = percentage.toFixed(2) + '%';
+                    // console.log("两位小数",percentage);
+                } else if (percentage == parseInt(percentage)) {
+                    percentage = parseInt(percentage) + '%';
+                    // console.log("int",percentage);
+                }
+                var tr = '<tr><td>' + this.name + '</td><td>' + this.value + '</td><td>' + percentage + '</td></tr>';
+                table.append(tr);
+            });
+        }
+    }
+  	//饼状图模拟数据
+   	function pieTab_on() {
+   	 	 	//饼状图 table 标题
+     	 	var age_tr = '<tr><td>年龄</td><td>数量</td><td>占比</td></tr>';  // 商户年龄表标题
+       		var datas =[{"value":57,"name":"60后"},{"value":134,"name":"70后"},{"value":99,"name":"80后"},{"value":14,"name":"90后"},{"value":0,"name":"00后"},{"value":10,"name":"其他"}];
+                let ownerAgeData = datas;
+                // console.log("ownerAgeData", ownerAgeData);
+                pieTableFn(datas, ".tableon", age_tr);
+				var fd_age_total = 0;  //总人数变量
+                $.each(datas,function () {
+                    fd_age_total += this.value;
+                });
+                $(".tableon").append('<tr><td colspan="3" class="total_txt">饼状_one共计' + fd_age_total + '人</td></tr>');
+
+                // 年龄名数组
+               let ownerAgeName = array_column(datas, "name");
+               // 赋值类 fd_age
+               pieChart('fd_age', '饼状_one', ownerAgeName, ownerAgeData, '45%', ['50%', '74%']);
+	}
+    pieTab_on();
+
+    //树状图模拟数据
+    //树状图表格渲染方法
+    function yearsFn(datas, dom) {
+        var years_table = $(dom).empty();
+        years_table.append('<tr><td>经营年限</td><td>商户数量</td></tr>');
+        // 渲染经营年数
+        $.each(datas, function () {
+            var td = '<tr><td>' + this.name + '</td><td>' + this.value + '</td></tr>';
+            years_table.append(td);
+        });
+    }
+    function pieTab_two() {
+     		   var datas = [{"value":1,"name":"一年以内"},{"value":15,"name":"1-3年"},{"value":16,"name":"3-5年"},{"value":33,"name":"5-10年"},{"value":48,"name":"10年以上"}];
+
+                // console.log("datas",datas);
+                yearsFn(datas, ".czh_years_table");
+                // 获取年限阶段名
+                let operatorYearsName = array_column(datas, "name");
+                // 获取年限数
+                let operatorYearsNum = array_column(datas, "value");
+                barChart('czh_year', 'pieTab_two', x_grid, axisData(operatorYearsName), {}, ['#bb85f5'], '35%', operatorYearsNum);
+    }
+    pieTab_two();
+	//echarts_on带有table
+	 function echarts_on(new_year) {
+	     		  //模拟接口请求数据
+	        		let total = 0;
+	                let violationsData = [];   // 两个数组合并为一个对象数组时用
+	                let violations_table = $(".tabletwo").empty();  //获取table加载清空，接下来增加数据
+	                violations_table.append('<tr><td>月份</td><td>次数</td></tr>');
+	                // 获取Y轴月份
+	                let   violationsName = ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"];
+	                // 获取X轴值
+	                let  violationsNum = [10, 20, 30, 10, 60, 80, 40, 60, 1, 19, 32, 9];
+	                // 渲染统计
+	                if(violationsName || violationsNum) {
+	                	//颜色可更改
+	                    barChart('shop_violations_content', 'echarts_on带有table表格', y_grid, {}, axisData(violationsName), ['#3398DB'], '60%', violationsNum);
+	                }
+
+	                // 把次数数组和月份数组合并为一个对象数组
+	                $.each(violationsName, function (index, item) {
+	                    violationsData.push({
+	                        month: item,
+	                        count: violationsNum[index]
+	                    });
+
+	                });
+	                 // 渲染表格
+	                $.each(violationsData, function () {
+	                    let tr = '<tr><td>' + this.month + '</td><td>' + this.count + '</td></tr>';
+	                    violations_table.append(tr);
+	                    // 计算年度用电次数的总和
+	                    total += this.count;
+	                });
+	                // 渲染合计
+	                violations_table.append('<tr><td colspan="2" class="total_txt">'+ new_year +'年累计' + total + '次</td></tr>');
+	    }
+    //echarts_two不带table
+     function echarts_two(new_year) {
+     		  //模拟接口请求数据
+        		let total = 0;
+                let violationsData = [];   // 两个数组合并为一个对象数组时用
+                // 获取Y轴月份
+                let   TypeviolationsName = ["一次就好", "笑纳", "用力活着", "浪子闲话", "大秦赋", "大江大河2", "金晨", "李一桐", "肖战", "邓伦"];
+                // 获取X轴值
+                let  TypeviolationsNum = [500, 500, 500, 500, 500, 500,1000, 1000, 1000,1000];
+                // 渲染统计
+                if(TypeviolationsName || TypeviolationsNum) {
+                	//颜色可更改
+                    barChart('shop_type_content', 'echarts_on不带table表格', y_grid, {}, axisData(TypeviolationsName), ['#dd585B'], '60%', TypeviolationsNum);
+                }
+    }
+    echarts_on(new_year);
+    echarts_two(new_year);
+</script>
+</html>
