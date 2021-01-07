@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+	<title>echarts</title>
+	<link rel="stylesheet" type="text/css" href="./css/index.css">
+</head>
+<body>
+	<div class="echarts_box">
+		  <div class="shop_violations_box">
+                <div id="statistical_content"></div>
+        </div>
+        <!--表格-->
+        <table class="shop_violations_table"></table>
+	</div>
+</body>
+<script type="text/javascript" src="./js/jquery-1.11.3.min.js"></script>
+<script type="text/javascript" src="./js/echarts.min.js"></script>
+<script type="text/javascript" src="./js/shine.js"></script>
+<script type="text/javascript" src="./js/echartsFn.js"></script>
+<script type="text/javascript">
+    let statisticalData = [];   // 未处理数组合并
+    let statistical_table = $(".shop_violations_table").empty();  //获取table加载清空，接下来增加数据
+
+    let registered_total = 0; //未处理
+    let part_total=0; //部分处理
+    let have_total=0; //已处理
+    var cross_grid = {left: '3%', right: '3%', bottom: '10%', top:'2%',containLabel: true};
+    let legend=['已处理', '已登记'];
+    let crossName_one='已处理';
+    let crossName_two='已登记';
+    let mouth_cont= ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"]
+    let dataArr_one=[100, 200, 50, 70, 60, 0, 0, 200, 40, 19, 29, 80];
+    let dataArr_two=[4, 20, 80, 80, 50, 70, 40, 110, 10, 19, 29, 30];
+    crossBarChart('statistical_content',cross_grid,legend, {}, axisData(mouth_cont),crossName_one,"#37a2da",dataArr_one,crossName_two,"#ffd85c",dataArr_two);
+
+
+    $.each(mouth_cont, function (index, item) {
+        statisticalData.push({
+            department: item, //部门
+            No_deal: dataArr_one[index], //未处理
+            Part_deal:dataArr_two[index], //部分处理
+            cont_deal:dataArr_one[index]+dataArr_two[index],
+        });
+        console.log(dataArr_one[index]+dataArr_two[index])
+    });
+    console.log(statisticalData);
+    statistical_table.append('<tr><td>部门</td><td>未处理</td><td>部分处理</td><td>已处理</td><td>累计</td></tr>');
+    // 渲染商户违规table表格
+    $.each(statisticalData, function () {
+        let tr = '<tr><td>' + this.department + '</td><td>' + this.No_deal + '</td><td>' + this.Part_deal + '</td><td>' + this.cont_deal + '</td></tr>';
+        statistical_table.append(tr);
+        // 未处理总和
+        registered_total += this.No_deal;
+        //部分处理
+        part_total+=this.Part_deal;
+    });
+    // 渲染增加数据商户违规月度次数总计
+    statistical_table.append('<tr><td colspan="5" class="total_txt">公司整体：未处理'+registered_total+'起   部分处理'+part_total+'起   已处理'+have_total+'起</td></tr>');
+</script>
+</html>

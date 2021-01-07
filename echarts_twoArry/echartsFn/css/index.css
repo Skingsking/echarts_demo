@@ -1,0 +1,40 @@
+*{
+	margin: 0;
+	padding: 0
+}
+/*饼状*/
+#fd_age{
+	height: 20rem;
+}
+/*树状 横*/
+.shop_violations_box {
+    width:92%;
+    min-height: 6rem;
+    margin: 0 4%;
+    margin-top: 3rem;
+}
+.shop_violations_table {
+    width: 15rem;
+    color: #202020;
+    font-size: 0.7rem;
+    text-align: center;
+    margin: 0 auto;
+    margin-top: 1.2rem;
+}
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+.shop_violations_table tr {
+    color: #202020;
+    line-height: 1.5rem;
+}
+.shop_violations_table tr:nth-of-type(1) td {
+    color: #888888;
+}
+.shop_violations_table tr td {
+    width: 5rem;
+}
+.shop_violations_table tr td.total_txt {
+    color: #2F7DCD;
+}
